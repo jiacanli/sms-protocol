@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="logPathRuntime" value="/home/logs/sms-protocol"/>
+    <springProperty scope="context" name="logbackLoglevel" source="logback.loglevel"/>
+    
+    <!-- 控制台的日志输出样式 -->
+     <property name="CONSOLE_LOG_PATTERN" value="[%d{yyy-MM-dd HH:mm:ss.SSS}][%-5p][%c.%M:%L][%t] - %m%n"/>
+
+    <!-- 控制台Appender -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logbackLoglevel}</level>
+        </filter>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>utf8</charset>
+        </encoder>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+        	<pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </layout>
+    </appender>
+
+    <!-- info日志 -->
+    <appender name="infofile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <Prudent>true</Prudent>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>debug</level>
+            <OnMismatch>NEUTRAL</OnMismatch>
+            <OnMatch>DENY</OnMatch>
+        </filter>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>utf8</charset>
+        </encoder>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+        	<pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+             <FileNamePattern>${logPathRuntime}/%d{yyyyMMdd}/sms_protocol_%i.log</FileNamePattern>
+             <maxHistory>90</maxHistory>
+             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">  
+                      <maxFileSize>20MB</maxFileSize>  
+             </timeBasedFileNamingAndTriggeringPolicy>  
+        </rollingPolicy>
+    </appender>
+    
+    
+    <!-- debug日志 -->
+    <appender name="debugfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <Prudent>true</Prudent>  <!-- 支持多JVM同时操作同一个日志文件 -->  
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>debug</level>
+            <OnMatch>ACCEPT</OnMatch>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>utf8</charset>
+        </encoder>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+        	<pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+             <FileNamePattern>${logPathRuntime}/%d{yyyyMMdd}/sms_protocol_debug_%i.log</FileNamePattern>
+             <maxHistory>90</maxHistory>
+             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">  
+                      <maxFileSize>20MB</maxFileSize>  
+             </timeBasedFileNamingAndTriggeringPolicy>  
+        </rollingPolicy>
+    </appender>
+
+    
+    <logger name="org.springframework" level="WARN">
+    	<appender-ref ref="infofile"/>
+    	<appender-ref ref="debugfile"/>
+    </logger>
+    
+    <logger name="javax.activation" level="WARN"/>
+    <logger name="javax.mail" level="WARN"/>
+    <logger name="javax.xml.bind" level="WARN"/>
+    <logger name="ch.qos.logback" level="WARN"/>
+    <logger name="com.codahale.metrics" level="WARN"/>
+    <logger name="com.ryantenney" level="WARN"/>
+    <logger name="com.sun" level="WARN"/>
+    <logger name="com.zaxxer" level="WARN"/>
+    <logger name="org.bson" level="WARN"/>
+    <logger name="com.ulisesbocchio.jasyptspringboot" level="WARN"/>
+    <logger name="io.lettuce.core" level="WARN"/>
+    <logger name="org.hibernate.validator" level="WARN"/>
+    <logger name="org.thymeleaf" level="WARN"/>
+    <logger name="org.xnio" level="WARN"/>
+    <logger name="sun.rmi" level="WARN"/>
+    <logger name="sun.net.www" level="INFO"/>
+    <logger name="sun.rmi.transport" level="WARN"/>
+    <logger name="co.elastic.apm.shaded.stagemonitor.configuration.source.PropertyFileConfigurationSource" level="OFF"/>
+    <logger name="org.apache.catalina.startup.DigesterFactory" level="OFF"/>
+     
+    <!-- 默认日志输出为控制台和ES -->    
+    <root level="INFO">
+        <appender-ref ref="console"/>
+        <appender-ref ref="debugfile"/>
+        <appender-ref ref="infofile"/>
+    </root>
+</configuration>

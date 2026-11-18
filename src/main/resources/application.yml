@@ -1,0 +1,9 @@
+server:
+  port: 8899 #主应用端口
+spring:
+  application:
+    name: sms-protocol  #项目名称
+  profiles:
+    active: dev  # 开发环境 加载指定的配置文件
+logback:
+  loglevel: INFO # 日志级别 ERROR WARN INFO DEBUG ALL

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.zybank</groupId>
+    <artifactId>sms-protocol</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <!-- 生产环境为 Java 8：release=8 同时约束源码/字节码/API（编译期即拦截 Java 9+ 用法） -->
+        <maven.compiler.release>8</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.43.Final</version>
+        </dependency>
+
+        <!-- Mina 框架依赖：用于 IoBuffer ↔ ByteBuf 桥接（生产环境为 Mina，替代第三方 jar 时复用实体编解码） -->
+        <dependency>
+            <groupId>org.apache.mina</groupId>
+            <artifactId>mina-core</artifactId>
+            <version>2.0.23</version>
+        </dependency>
+
+
+            <!-- 日志门面 -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>2.0.17</version>
+            </dependency>
+
+            <!-- Logback 日志实现：1.4.x 支持 Java 8（1.5.x 要求 Java 11） -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.4.14</version>
+            </dependency>
+    </dependencies>
+
+    <!-- 显式声明编译插件版本与 Java 8 目标：避免旧版 maven-compiler-plugin（<3.6）不识别
+         maven.compiler.release 属性而回退到默认 source/target 1.5（报 "不再支持目标选项 5"） -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>8</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
