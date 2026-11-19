@@ -11,6 +11,15 @@ public final class CMPPLongSmsConstants {
     /** 单条短信 Msg_Content 最大长度 */
     public static final int MAX_SINGLE_MSG_LENGTH = 140;
 
+    /**
+     * 长短信分片正文最大字节数（128 字节）。
+     * <p>
+     * 与移动网关约定按 64 个 UCS2 汉字（128 字节）切分：
+     * 加上 6 字节 UDH 后为 134 字节，仍在 140 字节上限内；
+     * 7 字节 UDH 时为 135 字节，同样安全。
+     */
+    public static final int MAX_FRAGMENT_PAYLOAD_BYTES = 128;
+
     /** 6 字节 UDH 协议头长度 */
     public static final int UDH_HEADER_LENGTH_6 = 6;
 

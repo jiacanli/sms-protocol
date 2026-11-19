@@ -10,7 +10,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * CMPP 2.0 长短信拆分工具类（仅依赖字符串入参）
+ * CMPP 2.0 长短信拆分工具类（仅依赖字符串入参）。
+ * <p>
+ * 拆分规则：
+ * <ol>
+ *   <li>总字节不超过 140 字节：按单条普通短信发送，不附加 UDH</li>
+ *   <li>超过 140 字节：每片正文按 {@link CMPPLongSmsConstants#MAX_FRAGMENT_PAYLOAD_BYTES}
+ *       （128 字节 = UCS2 64 个汉字 / ASCII 128 个字符）切分，每片前置 6 或 7 字节 UDH</li>
+ * </ol>
  */
 public final class CMPPLongSmsUtil {
 
@@ -28,7 +35,9 @@ public final class CMPPLongSmsUtil {
     // ==================================================================
 
     /**
-     * 拆分长短信为多条 CMPPSubmit（默认 6 字节 UDH）
+     * 拆分长短信为多条 CMPPSubmit（默认 6 字节 UDH）。
+     * <p>
+     * 每片正文最多 128 字节（UCS2 下 64 个汉字）；未超过 140 字节的内容按单条发送。
      *
      * @param content 待发送的完整短文明文
      * @param msgFmt  信息格式：0=ASCII，8=UCS2，15=GBK
@@ -61,14 +70,16 @@ public final class CMPPLongSmsUtil {
             return result;
         }
 
-        // ---- 计算每片正文最大字节数 ----
-        int udhLen = use7Byte
-                ? CMPPLongSmsConstants.UDH_HEADER_LENGTH_7
-                : CMPPLongSmsConstants.UDH_HEADER_LENGTH_6;
-        int maxPayloadBytes = CMPPLongSmsConstants.MAX_SINGLE_MSG_LENGTH - udhLen;
+        // ---- 单条：总字节不超过协议上限，一条普通短信（不附加 UDH） ----
+        byte[] whole = content.getBytes(charset);
+        if (whole.length <= CMPPLongSmsConstants.MAX_SINGLE_MSG_LENGTH) {
+            result.add(buildPiece(msgFmt, 0, 1, 1, whole));
+            return result;
+        }
 
-        // ---- 按字符边界切分 ----
-        List<String> segments = splitByCharBoundary(content, maxPayloadBytes, charset);
+        // ---- 长短信：每片正文按 128 字节切分（UCS2 下即 64 个汉字） ----
+        List<String> segments = splitByCharBoundary(
+                content, CMPPLongSmsConstants.MAX_FRAGMENT_PAYLOAD_BYTES, charset);
         int total = segments.size();
 
         if (total > 255 && !use7Byte) {
@@ -77,13 +88,6 @@ public final class CMPPLongSmsUtil {
         }
         if (total > 65535) {
             throw new IllegalArgumentException("分片数量过多: " + total);
-        }
-
-        // ---- 单条：不附加 UDH ----
-        if (total == 1) {
-            byte[] payload = segments.get(0).getBytes(charset);
-            result.add(buildPiece(msgFmt, 0, 1, 1, payload));
-            return result;
         }
 
         // ---- 多条：生成同一参考号，逐片构建 ----
